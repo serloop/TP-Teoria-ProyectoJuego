@@ -3,6 +3,7 @@ from elementos.raza import Raza
 from elementos.extra.mision import Mision
 from elementos.extra.mascota import Mascota
 from elementos.extra.arma import Arma, TipoArma
+from elementos.extra.objeto import Objeto
 
 class Personaje:
     """
@@ -41,19 +42,24 @@ class Personaje:
         equipo: str -- equipo al que pertenece el personaje
         nombre: str -- nombre del personaje
         """
-        self.raza: Raza  = raza                                # publico, puede ser accedido desde fuera de la clase
+        self.raza: Raza  = raza  # publico, puede ser accedido desde fuera de la clase
         self._aliado: bool = aliado
         self._equipo: str = equipo
         self._dinero: int = 0
         self._nombre: str = nombre
-        self.__id_base_datos: int = random.randint(0, 99999)   # privado para gestionarlo de manera segura solo desde esta clase
+        self.__id_base_datos: int = random.randint(0, 99999) # privado para gestionarlo de manera segura solo desde esta clase
+
+        # Relaciones con otras clases
         self._mascota: 'Mascota' = None
-        self.set_mascota(mascota)                               # si tenemos el método set_mascota, podemos usarlo en el constructor
-        self._arma: Arma = None                                 # sólo se puede tener un arma si se la fabrica para él mismo
+        self.set_mascota(mascota) # si tenemos el método set_mascota, podemos usarlo en el constructor
+        self._arma: Arma = None # sólo se puede tener un arma si se la fabrica para él mismo (composición)
+
+        self._amigos: list['Personaje'] = []  # lista de amigos (asociación)
+        self._inventario: list['Objeto'] = []  # lista de objetos que porta consigo el personaje (agregación), no se puede tener objetos al principio
 
         Personaje.numero_personajes += 1
 
-        self.__guardar_datos()                                   # llamada a un método privado (no se puede acceder desde fuera de la clase)
+        self.__guardar_datos() # llamada a un método privado (no se puede acceder desde fuera de la clase)
 
 
     # Método mágico para representar el objeto como string
@@ -109,6 +115,15 @@ class Personaje:
         """
         return self._mascota
 
+    def get_arma(self) -> 'Arma':
+        return self._arma
+
+    def get_amigos(self) -> list['Personaje']:
+        return self._amigos
+
+    def get_inventario(self) -> list['Objeto']:
+        return self._inventario
+
     def get_raza(self) -> Raza:
         """
         Devuelve la raza del personaje
@@ -118,7 +133,7 @@ class Personaje:
         """
         return self.raza
 
-    def _get_dinero(self) -> int:           # sólo se puede acceder al dinero desde dentro de la clase/subclases
+    def _get_dinero(self) -> int: # sólo se puede acceder al dinero desde dentro de la clase/subclases
         """
         Devuelve el dinero del personaje
 
@@ -127,7 +142,7 @@ class Personaje:
         """
         return self._dinero
 
-    def _set_dinero(self, dinero: int):     # sólo se puede modificar el dinero desde dentro de la clase/subclases
+    def _set_dinero(self, dinero: int): # sólo se puede modificar el dinero desde dentro de la clase/subclases
         """
         Establece el dinero del personaje
 
@@ -136,7 +151,7 @@ class Personaje:
         """
         self._dinero = dinero
 
-    def __get_id_base_datos(self) -> int:   # sólo se puede acceder al id de la base de datos desde dentro de la clase
+    def __get_id_base_datos(self) -> int: # sólo se puede acceder al id de la base de datos desde dentro de la clase
         """
         Devuelve el id de la base de datos del personaje
         """
@@ -148,7 +163,7 @@ class Personaje:
         """
         if mascota:
             self._mascota = mascota
-            mascota.add_dueño(self) # añadimos al personaje como dueño de la mascota
+            mascota.add_dueño(self) # añadimos al personaje como dueño de la mascota (BIDIRECCIONALIDAD)
             print(f"¡Bienvenido, {self._mascota.get_nombre()}!")
 
     # Otros métodos de instancia
@@ -212,6 +227,40 @@ class Personaje:
         """
         print(f"Realizando misión: {str(mision)}")
 
+    def usar_objeto(self, objeto: Objeto):
+        """
+        Usa un objeto no incorporado al inventario.
+        Parámetros:
+        objeto: Objeto -- objeto a usar
+        """
+        objeto.usar_objeto()
+
+    def añadir_amigo(self, amigo: 'Personaje') -> bool:
+        """
+        Añade un amigo al personaje (RELACIÓN DE ASOCIACIÓN)
+
+        Parámetros:
+        amigo: Personaje -- amigo a añadir
+
+        Returns:
+        bool -- True si se ha añadido el amigo, False en caso
+        """
+        if amigo not in self.get_amigos():
+            self.get_amigos().append(amigo)
+            amigo.añadir_amigo(self)  # bidireccionalidad
+            return True
+        return False
+
+    def recoger_objeto(self, objeto: Objeto):
+        """
+        Añade un objeto al inventario del personaje (RELACIÓN DE AGREGACIÓN)
+
+        Parámetros:
+        objeto: Objeto -- objeto a añadir al inventario
+        """
+        print(f"Recogiendo objeto: {str(objeto)}")
+        self.get_inventario().append(objeto)
+
     def fabricar_arma(self, nombre: str, tipo: TipoArma):
         """
         Crea un arma para el personaje. Sólo se puede tener un arma.
@@ -222,8 +271,7 @@ class Personaje:
         tipo: TipoArma -- tipo del arma
         """
         print(f"Fabricando arma: {nombre}")
-        self._arma = Arma(nombre=nombre, daño=random.randint(0,100), tipo=tipo, dueño=self)
-
+        self._arma = Arma(nombre=nombre, daño=random.randint(0,100), tipo=tipo, dueño=self) # composición, el arma se destruirá con el personaje
 
     def disparar(self) -> bool:
         """
@@ -232,12 +280,12 @@ class Personaje:
         Returns:
         bool -- True si ha disparado, False en caso contrario
         """
-        if self._arma:
-            return self._arma.dispara()   # delego en el arma, no necesito saber cómo lo hace o el número de balas
+        if self.get_arma():
+            return self.get_arma().dispara()   # delego en el arma, no necesito saber cómo lo hace o el número de balas
         else:
             print("No tengo arma")
             return False
-                        
+
     
     def alimentar_mascota(self):
         """
@@ -246,5 +294,5 @@ class Personaje:
         Returns:
         bool -- True si ha alimentado a la mascota, False en caso contrario
         """
-        if self._mascota and not self._mascota.tiene_energia():   # no necesito saber su energia, sólo si tiene  (delego esa comprobación)
-            self._mascota.alimentar()                             # no necesito saber cómo lo hace, sólo que lo hace (delego esa funcionalidad)
+        if self.get_mascota() and not self.get_mascota().tiene_energia(): # no necesito saber su energia, sólo si tiene  (delego esa comprobación)
+            self.get_mascota().alimentar() # no necesito saber cómo lo hace, sólo que lo hace (delego esa funcionalidad)

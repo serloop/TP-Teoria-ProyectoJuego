@@ -11,6 +11,9 @@ class Objeto:
         self._nombre: str = nombre
         self._descripcion: str = descripcion
 
+    def usar_objeto(self) -> None:
+        print(f"Se ha usado el objeto {self._nombre}")
+
     def __str__(self):
         """
         Devuelve el objeto en formato string
