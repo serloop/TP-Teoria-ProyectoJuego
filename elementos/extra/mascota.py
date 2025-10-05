@@ -1,4 +1,4 @@
-from elementos.raza import Raza
+from elementos.personajes.raza import Raza
 
 class Mascota:
     """

@@ -1,5 +1,5 @@
 import random
-from elementos.raza import Raza
+from elementos.personajes.raza import Raza
 from elementos.extra.mision import Mision
 from elementos.extra.mascota import Mascota
 from elementos.extra.arma import Arma, TipoArma
@@ -10,7 +10,7 @@ class Personaje:
     Representa a un personaje del juego
     """
 
-    numero_personajes = 0
+    numero_personajes: int = 0
 
     @classmethod
     def get_numero_personajes(cls)->int:

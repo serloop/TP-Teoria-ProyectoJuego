@@ -12,9 +12,9 @@ class Mision:
         dificultad: int -- dificultad de la misión
         descripcion: str -- descripción de la misión
         """
-        self._nombre = nombre
-        self._dificultad = dificultad
-        self._descripcion = descripcion
+        self._nombre: str = nombre
+        self._dificultad: int = dificultad
+        self._descripcion: str = descripcion
 
     def __str__(self) -> str:
         """

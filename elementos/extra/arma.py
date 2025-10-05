@@ -24,10 +24,10 @@ class Arma:
         dueño: Personaje -- personaje dueño del arma
         """
 
-        self._nombre = nombre
-        self._daño = daño
-        self._tipo = tipo
-        self._dueño = dueño
+        self._nombre: str = nombre
+        self._daño: int = daño
+        self._tipo: TipoArma = tipo
+        self._dueño: 'Personaje' = dueño
         
         if TipoArma.FUEGO == tipo:
             self._balas = 10        # solo si es Arma de Fuego
