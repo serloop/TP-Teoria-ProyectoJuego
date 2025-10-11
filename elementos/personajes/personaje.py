@@ -1,8 +1,12 @@
 import random
+
+from elementos.extra.armas.armaCorta import ArmaCorta
+from elementos.extra.armas.armaFuego import ArmaFuego
+from elementos.extra.armas.armaLarga import ArmaLarga
 from elementos.personajes.raza import Raza
 from elementos.extra.mision import Mision
 from elementos.extra.mascota import Mascota
-from elementos.extra.arma import Arma, TipoArma
+from elementos.extra.armas.arma import Arma, TipoArma
 from elementos.extra.objeto import Objeto
 
 class Personaje:
@@ -60,6 +64,8 @@ class Personaje:
         Personaje.numero_personajes += 1
 
         self.__guardar_datos() # llamada a un método privado (no se puede acceder desde fuera de la clase)
+
+        self._vida = 100 # vida del personaje
 
 
     # Método mágico para representar el objeto como string
@@ -150,6 +156,15 @@ class Personaje:
         dinero: int -- dinero del personaje
         """
         self._dinero = dinero
+
+    def get_vida(self):
+        """
+        Devuelve la vida del personaje
+
+        Returns:
+        int -- vida del personaje
+        """
+        return self._vida
 
     def __get_id_base_datos(self) -> int: # sólo se puede acceder al id de la base de datos desde dentro de la clase
         """
@@ -271,22 +286,20 @@ class Personaje:
         tipo: TipoArma -- tipo del arma
         """
         print(f"Fabricando arma: {nombre}")
-        self._arma = Arma(nombre=nombre, daño=random.randint(0,100), tipo=tipo, dueño=self) # composición, el arma se destruirá con el personaje
 
-    def disparar(self) -> bool:
-        """
-        Dispara el arma del personaje, si tiene una
-
-        Returns:
-        bool -- True si ha disparado, False en caso contrario
-        """
-        if self.get_arma():
-            return self.get_arma().dispara()   # delego en el arma, no necesito saber cómo lo hace o el número de balas
+        if tipo == TipoArma.CORTA_DISTANCIA:
+            self._arma = ArmaCorta(nombre=nombre, dueño=self, numero_estocadas=3)
+        elif tipo == TipoArma.LARGA_DISTANCIA:
+            self._arma = ArmaLarga(nombre=nombre, dueño=self)
+        elif tipo == TipoArma.FUEGO:
+            self._arma = ArmaFuego(nombre=nombre, dueño=self, balas=random.randint(1, 10))
         else:
-            print("No tengo arma")
+            print("Tipo de arma no válido")
             return False
 
-    
+        print(f"Arma creada: {self.get_arma()}")
+        return True
+
     def alimentar_mascota(self):
         """
         Alimenta a la mascota del personaje si no tiene energía
@@ -296,3 +309,45 @@ class Personaje:
         """
         if self.get_mascota() and not self.get_mascota().tiene_energia(): # no necesito saber su energia, sólo si tiene  (delego esa comprobación)
             self.get_mascota().alimentar() # no necesito saber cómo lo hace, sólo que lo hace (delego esa funcionalidad)
+
+    # Eliminamos el método "disparar" y creamos nuevos métodos para interactuar con las armas
+
+    def usar_arma(self, objetivo: 'Personaje') -> bool:
+        """
+        Usa el arma del personaje.
+
+        Returns:
+        bool -- True si ha podido usarla, False en caso contrario
+        """
+        if self.get_arma():
+            return self.get_arma().usar(objetivo=objetivo)  # delegación
+        else:
+            print("No tengo arma!")
+            return False
+
+    def mejorar_arma(self):
+        """
+        Mejora el arma del personaje
+        """
+        if self._arma:
+            self.get_arma().mejorar()  # delegación + polimorfismo
+
+
+    def recibir_daño(self, daño: int):
+        """
+        Recibe daño en la vida
+
+        Parámetros:
+        daño: int -- daño a recibir
+        """
+        if self.get_vida() == 0:
+            print(f"{self._nombre} ya está muerto")
+
+        else:
+            self._vida -= daño
+            if self.get_vida() <= 0:
+                self._vida = 0
+                print(f"{self.get_nombre()} ha recibido {daño} puntos de daño y ha muerto")
+            else:
+                print(f"{self.get_nombre()} ha recibido {daño} puntos de daño. Vida restante: {self.get_vida()}")
+
