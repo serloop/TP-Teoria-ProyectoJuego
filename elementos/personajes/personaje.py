@@ -5,11 +5,12 @@ from elementos.extra.armas.armaFuego import ArmaFuego
 from elementos.extra.armas.armaLarga import ArmaLarga
 from elementos.personajes.raza import Raza
 from elementos.extra.mision import Mision
-from elementos.extra.mascota import Mascota
 from elementos.extra.armas.arma import Arma, TipoArma
 from elementos.extra.objeto import Objeto
+from graficos.dibujable import IDibujable
 
-class Personaje:
+
+class Personaje(IDibujable):
     """
     Representa a un personaje del juego
     """
@@ -67,6 +68,8 @@ class Personaje:
 
         self._vida = 100 # vida del personaje
 
+        self._x = 0  # posición x en el mapa (atributo que necesitamos para método de interfaz)
+        self._y = 0  # posición y en el mapa (atributo que necesitamos para método de interfaz)
 
     # Método mágico para representar el objeto como string
     def __str__(self) -> str:
@@ -351,3 +354,51 @@ class Personaje:
             else:
                 print(f"{self.get_nombre()} ha recibido {daño} puntos de daño. Vida restante: {self.get_vida()}")
 
+    ######## Métodos de la interfaz IDibujable ########### [POR LO TANTO, TODAS LAS SUBCLASES TAMBIÉN]
+    def dibujar(self):
+        """
+        Dibuja el personaje en el mapa
+        """
+        print(f"Dibujando personaje {self.get_nombre()} en la posición ({self._x}, {self._y})")
+
+    def obtener_posicion(self) -> tuple[int, int]:
+        """
+        Devuelve la posición del personaje en el mapa
+
+        Returns:
+        tuple[int, int] -- posición x, y
+        """
+        return self._x, self._y
+
+    def mover(self, nueva_posicion: tuple[int, int]):
+        """
+        Mueve el personaje a una nueva posición en el mapa
+
+        Parámetros:
+        nueva_posicion: tuple[int, int] -- nueva posición del personaje
+        """
+        self._x, self._y = nueva_posicion
+        print(f"{self._nombre} se ha movido a la posición {nueva_posicion}")
+
+    def interactuar(self, otro: 'IDibujable'):
+        """
+        Interacción entre este personaje y otro elemento dibujable en el mapa
+
+        Parámetros:
+        otro: Dibujable -- elemento con el que interactuar
+        """
+
+        from elementos.extra.mascota import Mascota
+
+        # Un orco siempre atacará a cualquier otro personaje
+        if type(self) == 'Orco' and isinstance(otro, Personaje):
+            self.usar_arma(objetivo=otro)
+        # si me encuentro con un objeto, lo recojo
+        elif type(otro) == Objeto:
+            self.recoger_objeto(objeto=otro)
+        # si me encuentro con una mascota, la adopto
+        elif type(otro) == Mascota:
+            self.set_mascota(mascota=otro)
+        # en cualquier otro caso, hablo
+        else:
+            print(f"{self.get_nombre()} habla con {otro}")

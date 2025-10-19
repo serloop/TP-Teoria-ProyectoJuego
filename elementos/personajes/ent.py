@@ -21,6 +21,9 @@ class Ent(Personaje):
         self._nombre = nombre
         self._tipo = Raza.ENT  # Ocultación de atributos, no se heredan de la clase padre
 
+        self._x = 0  # posición x en el mapa (atributo que necesitamos para método de interfaz)
+        self._y = 0  # posición y en el mapa (atributo que necesitamos para método de interfaz)
+
     # IMPORTANTE: El resto de métodos y funcionalidades de la clase padre se heredan igualmente
     # Las funcionalidades relacionadas con los atributos que hemos ocultado pueden fallar (no existen).
     # Por ejemplo, no se puede dar monedas, ni quitar monedas, ni comprobar si tiene dinero.

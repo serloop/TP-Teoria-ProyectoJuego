@@ -1,5 +1,5 @@
-from elementos.personajes.personaje import Personaje
 from elementos.extra.mascota import Mascota
+from elementos.personajes.personaje import Personaje
 from elementos.personajes.raza import Raza
 
 # Clase orco heredando de Personaje, ocultando el atributo dinero
