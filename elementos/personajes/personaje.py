@@ -1,5 +1,6 @@
 import random
 
+from elementos.errores.errores import ArmaError, ArmaVaciaError
 from elementos.extra.armas.armaCorta import ArmaCorta
 from elementos.extra.armas.armaFuego import ArmaFuego
 from elementos.extra.armas.armaLarga import ArmaLarga
@@ -297,8 +298,8 @@ class Personaje(IDibujable):
         elif tipo == TipoArma.FUEGO:
             self._arma = ArmaFuego(nombre=nombre, dueño=self, balas=random.randint(1, 10))
         else:
-            print("Tipo de arma no válido")
-            return False
+            raise ArmaError("PERSONAJE: Tipo de arma no válido")
+            return False # Se ejecutaría?
 
         print(f"Arma creada: {self.get_arma()}")
         return True
@@ -323,10 +324,16 @@ class Personaje(IDibujable):
         bool -- True si ha podido usarla, False en caso contrario
         """
         if self.get_arma():
-            return self.get_arma().usar(objetivo=objetivo)  # delegación
+            try:
+                return self.get_arma().usar(objetivo=objetivo)  # delegación
+            except ArmaVaciaError as error_arma_vacia:  # Importante el orden, primero subclases
+                print(f"PERSONAJE: {error_arma_vacia}")
+                raise error_arma_vacia
+            except ArmaError as error:
+                print(f"{self.get_nombre()} no puede usar el arma, aunque tenga balas")
+                raise error  # si quiero seguir lanzando error
         else:
-            print("No tengo arma!")
-            return False
+            raise ArmaError("No tengo arma!")
 
     def mejorar_arma(self):
         """

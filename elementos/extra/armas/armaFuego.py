@@ -1,3 +1,4 @@
+from elementos.errores.errores import ArmaVaciaError
 from elementos.extra.armas.arma import Arma
 from elementos.extra.armas.tipoArma import TipoArma
 
@@ -45,8 +46,8 @@ class ArmaFuego(Arma):
             self._balas -= 1
             return True
         else:
-            print("No hay balas")
-            return False
+            raise ArmaVaciaError(dueño=self.get_dueño(), arma=self)
+            return False # Por qué este código no es accesible?
 
     def mejorar(self):
         """

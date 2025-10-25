@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from elementos.extra.armas.tipoArma import TipoArma
 
-
 class Arma(ABC):
     """
     Representa un arma del juego
